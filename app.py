@@ -1,27 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_mysqldb import MySQL
-import pymysql
+import sqlite3
 
 app = Flask(__name__)
 
-# MySQL configurations
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'mysql!evapharma'
-app.config['MYSQL_DB'] = 'manager_tracker'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+def init_db():
+    conn = sqlite3.connect('database.db')
+    print("Opened database successfully")
 
-mysql = MySQL(app, connector=pymysql)
+    conn.execute('CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY, date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, peer TEXT, availability BOOLEAN)')
+    print("Table created successfully")
+    conn.close()
 
-peers = {
-    'Albert Einstein', 
+init_db()
+
+peers = ['Albert Einstein', 
     'Isaac Newton', 
     'Galileo Galilei', 
     'Marie Curie', 
     'Nikola Tesla', 
     'Thomas Edison', 
-    'Alan Turing'
-}
+    'Alan Turing']
 manager_availability = {peer: False for peer in peers}
 
 @app.route('/')
@@ -34,11 +32,10 @@ def submit():
     availability = request.form['availability'] == 'yes'
     manager_availability[peer] = availability
 
-    # Save to history
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO history (peer, availability) VALUES (%s, %s)", (peer, availability))
-    mysql.connection.commit()
-    cur.close()
+    with sqlite3.connect('database.db') as con:
+        cur = con.cursor()
+        cur.execute("INSERT INTO history (peer, availability) VALUES (?, ?)", (peer, availability))
+        con.commit()
 
     return redirect(url_for('result'))
 
@@ -48,10 +45,10 @@ def result():
 
 @app.route('/history')
 def history():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM history WHERE date >= NOW() - INTERVAL 1 MONTH")
-    history_data = cur.fetchall()
-    cur.close()
+    with sqlite3.connect('database.db') as con:
+        cur = con.cursor()
+        cur.execute("SELECT * FROM history WHERE date >= datetime('now', '-1 month')")
+        history_data = cur.fetchall()
     return render_template('history.html', history=history_data)
 
 @app.route('/delete_history')
@@ -60,10 +57,10 @@ def delete_history():
 
 @app.route('/delete_history_confirm', methods=['POST'])
 def delete_history_confirm():
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM history")
-    mysql.connection.commit()
-    cur.close()
+    with sqlite3.connect('database.db') as con:
+        cur = con.cursor()
+        cur.execute("DELETE FROM history")
+        con.commit()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
