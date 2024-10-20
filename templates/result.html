@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Manager Availability</title>
+  </head>
+  <body>
+    <h1>Manager Availability:</h1>
+    <ul>
+      {% for peer, available in availability.items() %}
+        <li>{{ peer }}: {{ 'Yes' if available else 'No' }}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

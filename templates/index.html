@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Manager Tracker</title>
+  </head>
+  <body>
+    <h1>Is Archimedes working with you today? </h1>
+    <form action="/submit" method="post">
+      <select name="peer">
+        {% for peer in peers %}
+          <option value="{{ peer }}">{{ peer }}</option>
+        {% endfor %}
+      </select>
+      <label><input type="radio" name="availability" value="yes"> Yes</label>
+      <label><input type="radio" name="availability" value="no"> No</label>
+      <button type="submit">Submit</button>
+    </form>
+    <br>
+    <a href="/history"><button type="button">View History</button></a>
+    <br><br>
+   <!--  <a href="/delete_history"><button type="button">Delete History</button></a> -->
+  </body>
+</html>

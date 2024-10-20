@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Manager Availability History</title>
+  </head>
+  <body>
+    <h1>Manager Availability History (Last Month)</h1>
+    <table border="1">
+      <tr>
+        <th>Date</th>
+        <th>Peer</th>
+        <th>Availability</th>
+      </tr>
+      {% for record in history %}
+      <tr>
+        <td>{{ record[1] }}</td>
+        <td>{{ record[2] }}</td>
+        <td>{{ 'Yes' if record[3] else 'No' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="/">Go Back</a>
+  </body>
+</html>
