@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_mysqldb import MySQL
+import pymysql
 
 app = Flask(__name__)
 
@@ -8,7 +9,9 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'mysql!evapharma'
 app.config['MYSQL_DB'] = 'manager_tracker'
-mysql = MySQL(app)
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
+mysql = MySQL(app, connector=pymysql)
 
 peers = {
     'Albert Einstein', 
@@ -57,14 +60,11 @@ def delete_history():
 
 @app.route('/delete_history_confirm', methods=['POST'])
 def delete_history_confirm():
-    print("Delete history request received")
     cur = mysql.connection.cursor()
     cur.execute("DELETE FROM history")
     mysql.connection.commit()
     cur.close()
-    print("History deleted successfully")
     return redirect(url_for('index'))
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
